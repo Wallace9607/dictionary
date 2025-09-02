@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dicionário de Frases Inglês ↔ Português</title>
+<style>
+:root{
+  --bg:#0f172a; --panel:#0b1220; --panel2:#111827; --text:#e5e7eb; --muted:#94a3b8;
+  --accent:#38bdf8; --accent2:#22d3ee; --ring:0 0 0 1px rgba(56,189,248,.2), 0 10px 30px -10px rgba(56,189,248,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial; background:
+  radial-gradient(1200px 600px at 10% -10%, rgba(56,189,248,.15), transparent 60%),
+  radial-gradient(1000px 600px at 90% 0%, rgba(34,211,238,.10), transparent 60%),
+  linear-gradient(180deg, var(--bg), #060b16 40%, #050a14 100%); padding:32px 16px;}
+.wrap{max-width:1000px;margin:0 auto}
+header{text-align:center;margin-bottom:24px}
+h1{margin:0;font-size:clamp(28px,5vw,42px);background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}
+.subtitle{color:var(--muted);font-size:16px;max-width:65ch;margin:8px auto 16px}
+
+form{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:24px}
+form input{padding:8px 12px; border-radius:10px; border:1px solid rgba(148,163,184,.22); background:#0c1426; color:var(--text)}
+form button{background:#0ea5a4;border:0;color:#032;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+
+.panel{background:linear-gradient(180deg,var(--panel), rgba(15,23,42,.72)); border:1px solid rgba(148,163,184,.12); border-radius:14px; box-shadow:var(--ring); padding:16px}
+
+.phrase-card{background:linear-gradient(180deg, var(--panel2), rgba(15,23,42,.7)); border:1px solid rgba(148,163,184,.12); border-radius:12px; padding:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:transform .18s ease, box-shadow .18s ease}
+.phrase-card:hover{transform:translateY(-3px); box-shadow:0 0 0 1px rgba(34,211,238,.30), 0 15px 35px -10px rgba(34,211,238,.40)}
+.phrase-card span{font-size:16px;font-weight:700;color:var(--accent); text-align:center;}
+.phrase-card small{color:var(--muted);margin-top:6px;text-align:center;font-size:14px}
+.pron{margin-top:4px;color:#80e7ff;font-size:13px; text-align:center;}
+.card-actions{display:flex;gap:6px;margin-top:10px}
+.chip{font-size:12px;border-radius:8px;padding:6px 8px;border:1px solid rgba(148,163,184,.2);background:transparent;color:var(--text);cursor:pointer}
+</style>
+</head>
+<body>
+  <nav style=" padding:2px 4px; display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+  <a href="dis.html" style="color:#fff; font-weight:700; text-decoration:none; font-size:18px;"> Início</a>
+  <div style="display:flex; gap:16px;">
+    <a href="dictionary_words.html" style="color:#fff; text-decoration:none; font-weight:500;"> Palavras</a>
+  </div>
+</nav>
+<main class="wrap">
+<header>
+  <h1>Dicionário de Frases Inglês ↔ Português</h1>
+  <p class="subtitle">Adicione e pratique frases em inglês com tradução, pronúncia e áudio.</p>
+</header>
+
+<form id="addPhraseForm">
+  <input type="text" id="engPhrase" placeholder="Frase em inglês" required>
+  <input type="text" id="ptPhrase" placeholder="Tradução" required>
+  <input type="text" id="pronPhrase" placeholder="Pronúncia (aprox.)" required>
+  <button type="submit">Adicionar</button>
+</form>
+
+<section class="panel grid" id="phrases"></section>
+</main>
+
+<script>
+let phrases = JSON.parse(localStorage.getItem('phrasesDictionary')) || [
+  {w:'How are you?', t:'Como você está?', p:'ráu ár iú?'},
+  {w:'Good morning', t:'Bom dia', p:'gúd móorning'}
+];
+
+const container = document.getElementById('phrases');
+const form = document.getElementById('addPhraseForm');
+
+function render(){
+  container.innerHTML = '';
+  phrases.forEach((item, index) => {  // adiciona index
+    const card = document.createElement('div');
+    card.className='phrase-card';
+    card.innerHTML = `
+      <span>${item.w}</span>
+      <small>${item.t}</small>
+      <div class="pron">${item.p}</div>
+      <div class="card-actions">
+        <button class="chip" onclick="speak('${escape(item.w)}')">Ouvir</button>
+        <button class="chip" onclick="deletePhrase(${index})" style="background:#f87171;color:#0f172a;">Excluir</button>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function deletePhrase(index){
+  if(confirm('Deseja realmente excluir esta frase?')){
+    phrases.splice(index, 1);                     // remove do array
+    localStorage.setItem('phrases', JSON.stringify(phrases)); // atualiza localStorage
+    render();                                     // re-renderiza os cards
+  }
+}
+
+
+function escape(s){ return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function speak(text){
+  if('speechSynthesis' in window){
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  } else alert('TTS não disponível no seu navegador.');
+}
+
+form.onsubmit = function(e){
+  e.preventDefault();
+  const w = document.getElementById('engPhrase').value.trim();
+  const t = document.getElementById('ptPhrase').value.trim();
+  const p = document.getElementById('pronPhrase').value.trim();
+  if(w && t && p){
+    phrases.push({w,t,p});
+    localStorage.setItem('phrasesDictionary', JSON.stringify(phrases));
+    render();
+    form.reset();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
