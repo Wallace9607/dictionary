@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dicionário Inglês ↔ Português</title>
+<title>Dicionário Inglês ↔ Português + Treino de Pronúncia</title>
 <style>
 :root{
   --bg:#0f172a; --panel:#0b1220; --panel2:#111827; --text:#e5e7eb; --muted:#94a3b8;
-  --accent:#38bdf8; --accent2:#22d3ee; --ring:0 0 0 1px rgba(56,189,248,.2), 0 10px 30px -10px rgba(56,189,248,.25);
+  --accent:#38bdf8; --accent2:#22d3ee; --ok:#16a34a; --err:#ef4444;
 }
 *{box-sizing:border-box}
 html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial; background:
@@ -18,22 +18,21 @@ html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, 'S
 header{text-align:center;margin-bottom:24px}
 h1{margin:0;font-size:clamp(28px,5vw,42px);background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}
 .subtitle{color:var(--muted);font-size:16px;max-width:65ch;margin:8px auto 16px}
-
 form{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:24px}
 form input{padding:8px 12px; border-radius:10px; border:1px solid rgba(148,163,184,.22); background:#0c1426; color:var(--text)}
 form button{background:#0ea5a4;border:0;color:#032;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
-
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px}
-
-.panel{background:linear-gradient(180deg,var(--panel), rgba(15,23,42,.72)); border:1px solid rgba(148,163,184,.12); border-radius:14px; box-shadow:var(--ring); padding:16px}
-
 .word-card{background:linear-gradient(180deg, var(--panel2), rgba(15,23,42,.7)); border:1px solid rgba(148,163,184,.12); border-radius:12px; padding:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:transform .18s ease, box-shadow .18s ease}
 .word-card:hover{transform:translateY(-3px); box-shadow:0 0 0 1px rgba(34,211,238,.30), 0 15px 35px -10px rgba(34,211,238,.40)}
 .word-card span{font-size:20px;font-weight:700;color:var(--accent)}
 .word-card small{color:var(--muted);margin-top:6px;text-align:center;font-size:14px}
 .pron{margin-top:4px;color:#80e7ff;font-size:13px}
-.card-actions{display:flex;gap:6px;margin-top:10px}
+.card-actions{display:flex;gap:6px;margin-top:10px; flex-wrap:wrap}
 .chip{font-size:12px;border-radius:8px;padding:6px 8px;border:1px solid rgba(148,163,184,.2);background:transparent;color:var(--text);cursor:pointer}
+.status{margin-top:6px;font-size:12px;color:var(--muted);}
+.wordCompare{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:13px;}
+.wordCompare .ok{color:var(--ok);}
+.wordCompare .err{color:var(--err);}
 </style>
 </head>
 <body>
@@ -57,7 +56,7 @@ form button{background:#0ea5a4;border:0;color:#032;padding:10px 14px;border-radi
   <button type="submit">Adicionar</button>
 </form>
 
-<section class="panel grid" id="words"></section>
+<section class="grid" id="words"></section>
 </main>
 
 <script>
@@ -71,7 +70,7 @@ const form = document.getElementById('addWordForm');
 
 function render(){
   container.innerHTML = '';
-  data.forEach((item, index) => {  // adiciona index
+  data.forEach((item, index) => {
     const card = document.createElement('div');
     card.className='word-card';
     card.innerHTML = `
@@ -79,18 +78,64 @@ function render(){
       <small>${item.t}</small>
       <div class="pron">${item.p}</div>
       <div class="card-actions">
+        <button class="chip speakBtn">falar</button>
         <button class="chip" onclick="speak('${escape(item.w)}')">Ouvir</button>
         <button class="chip" onclick="deleteItem(${index})" style="background:#f87171;color:#0f172a;">Excluir</button>
-      </div>`;
+      </div>
+      <div class="status">—</div>
+      <div class="wordCompare"></div>
+    `;
     container.appendChild(card);
+
+    const speakBtn = card.querySelector('.speakBtn');
+    const statusEl = card.querySelector('.status');
+    const wordCompareEl = card.querySelector('.wordCompare');
+
+    speakBtn.onclick = ()=>{
+      if(!('webkitSpeechRecognition' in window)){
+        statusEl.textContent = 'Seu navegador não suporta reconhecimento de voz';
+        statusEl.style.color = '#ef4444';
+        return;
+      }
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = ()=>{ statusEl.textContent='Ouvindo... fale agora'; statusEl.style.color='#38bdf8'; }
+      recognition.onerror = (e)=>{ statusEl.textContent='Erro: '+e.error; statusEl.style.color='#ef4444'; }
+      recognition.onresult = (ev)=>{
+        const spoken = ev.results[0][0].transcript;
+        statusEl.textContent = `"${spoken}" → "${item.w}"`;
+        const correct = normalizeText(spoken) === normalizeText(item.w);
+        statusEl.style.color = correct ? '#16a34a' : '#ef4444';
+        renderWordComparison(normalizeText(item.w), normalizeText(spoken), wordCompareEl);
+      }
+      recognition.start();
+    }
   });
+}
+
+function renderWordComparison(expected, spoken, container){
+  container.innerHTML = '';
+  const expWords = expected.split(' ').filter(Boolean);
+  const spWords = spoken.split(' ').filter(Boolean);
+  for(let i=0;i<expWords.length;i++){
+    const exp = expWords[i];
+    const sp = spWords[i] || '';
+    const correct = levenshtein(exp, sp)/Math.max(exp.length, sp.length) <= 0.4;
+    const div = document.createElement('div');
+    div.textContent = sp+' → '+exp;
+    div.className = correct ? 'ok' : 'err';
+    container.appendChild(div);
+  }
 }
 
 function deleteItem(index){
   if(confirm('Deseja realmente excluir esta palavra?')){
-    data.splice(index, 1);                  // remove do array
-    localStorage.setItem('words', JSON.stringify(data)); // atualiza localStorage
-    render();                                // re-renderiza os cards
+    data.splice(index, 1);
+    localStorage.setItem('dictionary', JSON.stringify(data));
+    render();
   }
 }
 
@@ -118,7 +163,29 @@ form.onsubmit = function(e){
   }
 }
 render();
+
+/* helpers */
+function normalizeText(s){
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]/g,'').trim();
+}
+
+function levenshtein(a,b){
+  if(a===b) return 0;
+  const al=a.length, bl=b.length;
+  if(al===0) return bl;
+  if(bl===0) return al;
+  let v0=new Array(bl+1),v1=new Array(bl+1);
+  for(let j=0;j<=bl;j++) v0[j]=j;
+  for(let i=0;i<al;i++){
+    v1[0]=i+1;
+    for(let j=0;j<bl;j++){
+      const cost=a[i]===b[j]?0:1;
+      v1[j+1]=Math.min(v1[j]+1, v0[j+1]+1, v0[j]+cost);
+    }
+    [v0,v1]=[v1,v0];
+  }
+  return v0[bl];
+}
 </script>
 </body>
 </html>
-
