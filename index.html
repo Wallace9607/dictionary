@@ -1,47 +1,315 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meu Dicionário de Inglês</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Dicionário de Inglês</title>
 <style>
 :root{
-  --bg:#0f172a; --panel:#0b1220; --panel2:#111827; --text:#e5e7eb; --muted:#94a3b8;
-  --accent:#38bdf8; --accent2:#22d3ee; --ring:0 0 0 1px rgba(56,189,248,.2), 0 10px 30px -10px rgba(56,189,248,.25);
+  --bg:#e0f2f1; --panel:#ffffff; --text:#102027; --muted:#546e7a;
+  --accent:#80cbc4; --accent2:#4db6ac; --ok:#388e3c; --err:#d32f2f;
 }
-*{box-sizing:border-box}
-html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial; background:
-  radial-gradient(1200px 600px at 10% -10%, rgba(56,189,248,.15), transparent 60%),
-  radial-gradient(1000px 600px at 90% 0%, rgba(34,211,238,.10), transparent 60%),
-  linear-gradient(180deg, var(--bg), #060b16 40%, #050a14 100%); padding:32px 16px;}
-.wrap{max-width:900px;margin:0 auto;text-align:center}
-h1{margin:0;font-size:clamp(28px,5vw,42px);background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}
-p.subtitle{color:var(--muted);font-size:16px;max-width:65ch;margin:8px auto 32px}
-
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;justify-items:center}
-
-.card{background:linear-gradient(180deg, var(--panel2), rgba(15,23,42,.7)); border:1px solid rgba(148,163,184,.12); border-radius:14px; box-shadow:var(--ring); padding:24px; width:100%; max-width:280px; transition:transform .2s, box-shadow .2s; cursor:pointer; text-decoration:none; color:var(--text);}
-.card:hover{transform:translateY(-4px); box-shadow:0 0 0 1px rgba(34,211,238,.30), 0 15px 35px -10px rgba(34,211,238,.40);}
-.card h2{margin:0;font-size:20px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}
-.card p{margin-top:8px;color:var(--muted);font-size:14px;text-align:center;}
+body{margin:0;padding:32px 16px;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial;background:var(--bg);color:var(--text);}
+.wrap{max-width:1000px;margin:0 auto;}
+header{text-align:center;margin-bottom:24px;}
+h1{margin:0;font-size:clamp(28px,5vw,42px);background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent;}
+.subtitle{color:var(--muted);font-size:16px;max-width:65ch;margin:8px auto 16px;text-align:center;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+.word-card{background:var(--panel);border-radius:12px;padding:16px;margin-top: 30px; display:flex;flex-direction:column;align-items:center;transition:transform .18s ease,box-shadow .18s ease;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,0.08);}
+.word-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.12);}
+.word-card span{font-size:16px;font-weight:700;color:var(--accent);text-align:center;}
+.word-card small{color:var(--muted);margin-top:6px;text-align:center;font-size:14px;}
+.card-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+button{cursor:pointer;padding:8px 12px;border-radius:6px;border:none;font-weight:100;background:var(--accent);color:#fff;transition:background .2s;}
+button:hover{background:var(--accent2);}
+footer{margin-top:20px;text-align:center;color:var(--muted);}
+#wordScreen{display:none;}
+#wordScreen button{margin-bottom:15px;}
+input{padding:6px;border-radius:6px;border:1px solid #b0bec5;margin:4px;}
+textarea{width:100%;padding:6px;border-radius:6px;border:1px solid #b0bec5;margin:4px;}
+.example-block{width: 50%;margin-bottom:15px;padding:10px;border-left:3px solid var(--accent);background:var(--panel);border-radius:6px;}
+.example-block .actions{margin-top:8px;display:flex;gap:8px;align-items:center;}
+.result{margin-left:8px;font-size:0.95rem;}
+.empty{color:var(--muted);padding:12px;border-radius:8px;background:rgba(0,0,0,0.02);margin-top:8px;}
 </style>
 </head>
 <body>
 <main class="wrap">
-  <h1>Meu Dicionário de Inglês</h1>
-  <p class="subtitle">Acesse seus dicionários de palavras e frases para praticar inglês com tradução, pronúncia e áudio.</p>
-  
-  <div class="grid">
-    <a href="dictionary_words.html" class="card">
-      <h2>📖 Palavras</h2>
-      <p>Dicionário de palavras com pronúncia, áudio e cards interativos.</p>
-    </a>
-    
-    <a href="dictionary_phrases.html" class="card">
-      <h2>💬 Frases</h2>
-      <p>Dicionário de frases completas com tradução, pronúncia e áudio.</p>
-    </a>
-  </div>
+<header>
+  <h1>Dicionário de Inglês</h1>
+  <p class="subtitle">Adicione palavras e exemplos com pronúncia e tradução.</p>
+</header>
+
+<!-- Tela inicial -->
+<section id="homeScreen">
+  <h2>Adicionar nova palavra</h2>
+  <form id="addWordForm">
+    <input type="text" id="wordTitle" placeholder="Palavra (em inglês)" required>
+    <input type="text" id="wordPron" placeholder="Pronúncia (aprox.)">
+    <input type="text" id="wordSubtitle" placeholder="Tradução" required>
+    <button type="submit">Adicionar</button>
+  </form>
+
+  <section class="grid" id="wordCards"></section>
+</section>
+
+<!-- Tela da palavra -->
+<section id="wordScreen">
+  <button onclick="backHome()">⬅ Voltar</button>
+  <button id="deleteCurrentWord" style="background:#ef4444;color:#fff;margin-bottom:15px;">Excluir Palavra</button>
+
+  <h2 id="wordTitleScreen"></h2>
+  <h4 id="wordSubtitleScreen"></h4>
+  <div id="wordExamples"></div>
+
+  <h3>Adicionar Exemplo</h3>
+  <form id="addExampleForm">
+    <input type="text" id="exampleEn" placeholder="Exemplo em inglês" required>
+    <input type="text" id="examplePron" placeholder="Pronúncia (aprox.)">
+    <input type="text" id="examplePt" placeholder="Tradução" required>
+    <button type="submit">Adicionar Exemplo</button>
+  </form>
+</section>
 </main>
+
+<footer>Feito para estudar inglês</footer>
+
+<script>
+// dados
+let words = JSON.parse(localStorage.getItem('words')) || [];
+let currentWordIndex = null;
+
+// elementos
+const wordCardsContainer = document.getElementById('wordCards');
+const addWordForm = document.getElementById('addWordForm');
+const addExampleForm = document.getElementById('addExampleForm');
+
+// render da home (lista de palavras)
+function renderHome(){
+  wordCardsContainer.innerHTML = '';
+  if(!Array.isArray(words)) words = [];
+  
+  words.forEach((word, index)=>{
+    const card = document.createElement('div');
+    card.className='word-card';
+    card.innerHTML = `
+      <span>${escapeHtml(word.title)}</span>
+      <small>${escapeHtml(word.subtitle)}${word.pron ? ' — ' + escapeHtml(word.pron) : ''}</small>
+        
+      <div class="card-actions">
+        <button onclick="checkPronunciation('${escapeJs(word.pron || word.title)}', this)">🎤 Falar</button>
+        <button class="openWord">Ver Exemplos</button>
+        <button class="deleteWord" style="background:#ef4444;">Excluir</button>
+      </div>
+    `;
+    wordCardsContainer.appendChild(card);
+
+    card.querySelector('.openWord').onclick = ()=> openWordScreen(index);
+    card.querySelector('.deleteWord').onclick = ()=> {
+      if(confirm(`Deseja realmente excluir "${word.title}"?`)){
+        words.splice(index,1);
+        localStorage.setItem('words', JSON.stringify(words));
+        renderHome();
+      }
+    }
+  });
+
+  if(words.length === 0){
+    wordCardsContainer.innerHTML = '<div class="empty">Nenhuma palavra cadastrada. Adicione uma acima.</div>';
+  }
+}
+
+// adicionar palavra com pronúncia
+addWordForm.onsubmit = function(e){
+  e.preventDefault();
+  const title = document.getElementById('wordTitle').value.trim();
+  const subtitle = document.getElementById('wordSubtitle').value.trim();
+  const pron = document.getElementById('wordPron').value.trim();
+  if(title && subtitle){
+    words.push({title, subtitle, pron, examples:[]});
+    localStorage.setItem('words', JSON.stringify(words));
+    renderHome();
+    addWordForm.reset();
+  }
+};
+
+// abrir tela de palavra
+function openWordScreen(index){
+  currentWordIndex = index;
+  const word = words[index];
+  if(!word.examples) word.examples = [];
+  document.getElementById('homeScreen').style.display='none';
+  document.getElementById('wordScreen').style.display='block';
+  document.getElementById('wordTitleScreen').textContent = word.title;
+  document.getElementById('wordSubtitleScreen').textContent = word.subtitle;
+  renderExamples();
+}
+
+// voltar
+function backHome(){
+  currentWordIndex = null;
+  document.getElementById('wordScreen').style.display='none';
+  document.getElementById('homeScreen').style.display='block';
+}
+
+// render exemplos
+function renderExamples(){
+  const word = words[currentWordIndex];
+  const container = document.getElementById('wordExamples');
+  container.innerHTML = '';
+  if(!word || !Array.isArray(word.examples) || word.examples.length === 0){
+    container.innerHTML = '<div class="empty">Nenhum exemplo. Adicione um exemplo abaixo.</div>';
+    return;
+  }
+
+  word.examples.forEach((ex, i) => {
+    const div = document.createElement('div');
+    div.className = 'example-block';
+    div.innerHTML = `
+      <p contenteditable="true" onblur="updateExample(${i}, 'en', this.textContent)" style="font-weight:bold;margin:0;">${escapeHtml(ex.en)}</p>
+      <p contenteditable="true" onblur="updateExample(${i}, 'pron', this.textContent)" style="margin:3px 0;color:var(--muted);font-style:italic;">${escapeHtml(ex.pron)}</p>
+      <p contenteditable="true" onblur="updateExample(${i}, 'pt', this.textContent)" style="margin:0 0 5px 0;color:var(--text);">${escapeHtml(ex.pt)}</p>
+      <div class="actions">
+        <button style="background:#ef4444;color:#fff;" onclick="deleteExample(${i})">Excluir</button>
+        <button onclick="checkPronunciation('${escapeJs(ex.en)}', this)">🎤 Falar</button>
+        <span class="result"></span><br>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// helpers
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+function escapeJs(str){
+  if(!str) return '';
+  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+// reconhecimento de voz
+function checkPronunciation(expectedText, buttonEl){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    alert("Seu navegador não suporta reconhecimento de voz. Use Chrome/Edge (HTTPS ou localhost).");
+    return;
+  }
+
+  const resultEl = buttonEl.parentElement.querySelector('.result');
+  const originalLabel = buttonEl.textContent;
+  buttonEl.textContent = '🎙️ Ouvindo...';
+  buttonEl.disabled = true;
+  if(resultEl){ resultEl.textContent = ''; resultEl.style.color = 'var(--muted)'; }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  let finished = false;
+
+  const timeoutId = setTimeout(()=> { try{ recognition.stop(); }catch(e){} }, 8000);
+
+  recognition.onresult = (ev) => {
+    finished = true;
+    clearTimeout(timeoutId);
+    const spokenText = ev.results[0][0].transcript || '';
+    const confidence = ev.results[0][0].confidence ?? null;
+    const normExpected = normalizeText(expectedText);
+    const normSpoken = normalizeText(spokenText);
+    const dist = levenshtein(normExpected, normSpoken);
+    const maxLen = Math.max(normExpected.length, normSpoken.length, 1);
+    const ratio = dist / maxLen;
+    const similarity = (1 - ratio) * 100;
+    const THRESHOLD = 0.35;
+
+    if(resultEl){
+      if(ratio <= THRESHOLD){
+        resultEl.textContent = `✅ Bom! "${spokenText}" (${similarity.toFixed(0)}% parecido)` + (confidence ? ` — conf ${(confidence*100).toFixed(0)}%` : '');
+        resultEl.style.color = 'var(--ok)';
+      } else {
+        resultEl.textContent = `❌ Você disse: "${spokenText}" (${similarity.toFixed(0)}% parecido)` + (confidence ? ` — conf ${(confidence*100).toFixed(0)}%` : '');
+        resultEl.style.color = 'var(--err)';
+      }
+    }
+  };
+
+  recognition.onerror = (err) => { finished = true; clearTimeout(timeoutId); if(resultEl) resultEl.textContent = 'Erro no reconhecimento.'; console.warn('speech error', err); };
+  recognition.onend = () => { clearTimeout(timeoutId); if(!finished && resultEl) resultEl.textContent = 'Nenhuma fala detectada.'; buttonEl.textContent = originalLabel; buttonEl.disabled = false; };
+  try { recognition.start(); } catch(e) { console.error('start error', e); if(resultEl) resultEl.textContent = 'Erro ao iniciar microfone.'; buttonEl.textContent = originalLabel; buttonEl.disabled = false; }
+}
+
+// atualizar/excluir exemplos
+function updateExample(index, field, value){
+  if(currentWordIndex === null) return;
+  if(!words[currentWordIndex].examples) words[currentWordIndex].examples = [];
+  words[currentWordIndex].examples[index][field] = value.trim();
+  localStorage.setItem('words', JSON.stringify(words));
+}
+function deleteExample(index){
+  if(currentWordIndex === null) return;
+  words[currentWordIndex].examples.splice(index,1);
+  localStorage.setItem('words', JSON.stringify(words));
+  renderExamples();
+}
+
+// título e tradução editáveis
+document.getElementById('wordTitleScreen').setAttribute('contenteditable','true');
+document.getElementById('wordTitleScreen').addEventListener('blur', ()=> {
+  if(currentWordIndex === null) return;
+  words[currentWordIndex].title = document.getElementById('wordTitleScreen').textContent.trim();
+  localStorage.setItem('words', JSON.stringify(words));
+  renderHome();
+});
+document.getElementById('wordSubtitleScreen').setAttribute('contenteditable','true');
+document.getElementById('wordSubtitleScreen').addEventListener('blur', ()=> {
+  if(currentWordIndex === null) return;
+  words[currentWordIndex].subtitle = document.getElementById('wordSubtitleScreen').textContent.trim();
+  localStorage.setItem('words', JSON.stringify(words));
+  renderHome();
+});
+
+// adicionar exemplo
+addExampleForm.onsubmit = function(e){
+  e.preventDefault();
+  if(currentWordIndex === null){
+    alert('Abra (clique) em uma palavra antes de adicionar um exemplo.');
+    return;
+  }
+  const en = document.getElementById('exampleEn').value.trim();
+  const pron = document.getElementById('examplePron').value.trim();
+  const pt = document.getElementById('examplePt').value.trim();
+  if(en && pt){
+    if(!words[currentWordIndex].examples) words[currentWordIndex].examples = [];
+    words[currentWordIndex].examples.push({en, pron, pt});
+    localStorage.setItem('words', JSON.stringify(words));
+    renderExamples();
+    addExampleForm.reset();
+  }
+};
+
+// excluir palavra atual
+document.getElementById('deleteCurrentWord').onclick = ()=> {
+  if(currentWordIndex !== null && confirm(`Deseja realmente excluir "${words[currentWordIndex].title}"?`)){
+    words.splice(currentWordIndex,1);
+    localStorage.setItem('words', JSON.stringify(words));
+    backHome();
+    renderHome();
+  }
+};
+
+// helpers
+function normalizeText(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').trim(); }
+function levenshtein(a,b){ if(a===b) return 0; const al=a.length, bl=b.length; if(al===0) return bl; if(bl===0) return al; let v0=new Array(bl+1), v1=new Array(bl+1); for(let j=0;j<=bl;j++) v0[j]=j; for(let i=0;i<al;i++){ v1[0]=i+1; for(let j=0;j<bl;j++){ const cost = a[i]===b[j] ? 0 : 1; v1[j+1] = Math.min(v1[j]+1, v0[j+1]+1, v0[j]+cost); } [v0,v1] = [v1,v0]; } return v0[bl]; }
+
+// inicializa
+renderHome();
+</script>
 </body>
 </html>
