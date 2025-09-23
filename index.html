@@ -28,7 +28,13 @@ footer{margin-top:20px;text-align:center;color:var(--muted);}
 input{padding:6px;border-radius:6px;border:1px solid #b0bec5;margin:4px;}
 textarea{width:100%;padding:6px;border-radius:6px;border:1px solid #b0bec5;margin:4px;}
 .example-block{width: 50%;margin-bottom:15px;padding:10px;border-left:3px solid var(--accent);background:var(--panel);border-radius:6px;}
-.example-block .actions{margin-top:8px;display:flex;gap:8px;align-items:center;}
+.example-block .actions {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column; /* empilha verticalmente */
+  gap: 4px; /* espaçamento entre botão e resultado */
+  align-items: flex-start; /* ou center, se quiser centralizado */
+}
 .result{margin-left:8px;font-size:0.95rem;}
 .empty{color:var(--muted);padding:12px;border-radius:8px;background:rgba(0,0,0,0.02);margin-top:8px;}
   @media (max-width: 768px) {
@@ -338,4 +344,5 @@ renderHome();
 </script>
 </body>
 </html>
+
 
