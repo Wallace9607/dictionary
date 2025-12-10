@@ -45,6 +45,22 @@ textarea{width:100%;padding:6px;border-radius:6px;border:1px solid #b0bec5;margi
 }
 .result{margin-left:8px;font-size:0.95rem;}
 .empty{color:var(--muted);padding:12px;border-radius:8px;background:rgba(0,0,0,0.02);margin-top:8px;}
+
+  .word-translation {
+  color: var(--muted);
+  margin-top: 6px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.word-pron {
+  color: var(--accent2);
+  font-style: italic;
+  margin-top: 2px;
+  text-align: center;
+  font-size: 13px;
+}
+
 @media (max-width: 768px) {
   body { padding: 16px 8px;
   text-align: center;
@@ -149,7 +165,8 @@ function renderHome(){
     card.className='word-card';
     card.innerHTML = `
       <span>${escapeHtml(word.title)}</span>
-      <small>${escapeHtml(word.subtitle)}${word.pron ? ' — ' + escapeHtml(word.pron) : ''}</small>
+        ${word.pron ? `<small class="word-pron">${escapeHtml(word.pron)}</small>` : ""}
+  <small class="word-translation">${escapeHtml(word.subtitle)}</small>
         
       <div class="card-actions">
         <button onclick="checkPronunciation('${escapeJs(word.pron || word.title)}', this)"> Falar</button>
@@ -337,3 +354,4 @@ renderHome();
 </script>
 </body>
 </html>
+
